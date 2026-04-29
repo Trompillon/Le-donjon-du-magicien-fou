@@ -1,0 +1,867 @@
+@font-face {
+    font-family: "Merriweather";
+    src: url("fonts/Merriweather-VariableFont_opsz,wdth,wght.ttf") format("truetype");
+    font-weight: 100 900;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Merriweather";
+    src: url("fonts/Merriweather-Italic-VariableFont_opsz,wdth,wght.ttf") format("truetype");
+    font-weight: 100 900;
+    font-style: italic;
+}
+
+/* VARIABLES */
+
+:root {
+  --primary: #0f172a;
+  --secondary: #d3af37;
+  --input-bg: #D9D9D9;
+  --magic: #9b59b6;
+  --text-light: #ffffff;
+  --text-dark: #000000;
+  --font-main: 'Merriweather', serif;
+  --font-secondary: 'Cinzel', serif;
+}
+
+/* RESET */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-main);
+    background-color: var(--primary);
+    color: var(--text-light);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* NAVBAR */
+
+.navbar {
+    position: sticky;
+    top: 0;
+    background-color: black;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.nav-left,
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.nav-left li {
+    list-style: none;
+    margin-right: 20px;
+    position: relative; 
+    overflow: hidden;
+    display: inline-block;
+}
+
+.nav-left li a {
+    display: inline-block;
+    padding: 5px 0;
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: 0.95rem;
+    position: relative;
+    z-index: 1;
+    transition: 0.3s ease;
+}
+
+/* 1. L'EFFET DE REFLET (Flash) */
+.nav-left li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -150%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        120deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent
+    );
+    /* IMPORTANT : On met transition à 0s ici pour que le retour soit invisible */
+    transition: all 0s; 
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* 2. L'EFFET DE SOULIGNEMENT (Underline animé) */
+.nav-left li a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0; /* Départ à zéro */
+    height: 2px;
+    background-color: var(--secondary);
+    transition: width 0.3s ease;
+}
+
+/* --- ACTIONS AU SURVOL --- */
+
+/* Déclenche le reflet */
+.nav-left li:hover::before {
+    left: 150%;
+    transition: all 0.6s ease;
+}
+
+/* Déclenche le soulignement */
+.nav-left li:hover a::after {
+    width: 100%; /* La ligne se déploie */
+}
+
+.nav-left li a:hover {
+    color: var(--secondary); /* Optionnel : le texte s'éclaire un peu */
+}
+
+.nav-right .inventory-btn img {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.nav-right .inventory-btn img:hover {
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.8)) brightness(1.5);
+    transform: scale(1.1); /* Un léger zoom aide à la visibilité */
+}
+
+.nav-right .grimoire-btn img {
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    transition: 0.3s ease;
+}
+
+.nav-right .grimoire-btn img:hover {
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.8)) brightness(1.5);
+    transform: scale(1.1); /* Un léger zoom aide à la visibilité */
+}
+
+/* MODAL INVENTAIRE */
+
+.inventory-modal {
+    display: none; /* fermé par défaut */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(15,23,42,0.85);
+    justify-content: center; align-items: center;
+    z-index: 9999;
+    font-family: var(--font-secondary);
+}
+
+.inventory-content {
+    background: linear-gradient(145deg, #fef3e7, #ffe8c2);
+    color: #2b1d0e;
+    padding: 25px 30px;
+    border-radius: 15px;
+    max-width: 600px; width: 90%;
+    max-height: 80%; overflow-y: auto;
+    text-align: left;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+    border: 4px solid #8b5e3c;
+    position: relative;
+}
+
+#closeInventory {
+    position: absolute;
+    top: 10px; right: 10px;
+    padding: 6px 12px;
+    background-color: #8b5e3c;
+    color: #fff8e7;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+#closeInventory:hover { background-color: #a0522d; transform: scale(1.05); }
+
+.inventory-title {
+    text-align: center;
+    font-size: 1.8rem;
+    color: #603813;
+    text-shadow: 2px 2px #8b5e3c;
+}
+
+.inventory-item {
+    background-color: rgba(255, 238, 205, 0.8);
+    padding: 10px 15px;
+    margin-bottom: 12px;
+    border-left: 4px solid #a0522d;
+    border-radius: 6px;
+    font-family: var(--font-secondary);
+    color: #2b1d0e;
+}
+
+.inventory-gold {
+    text-align: right;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #b8860b;
+}
+
+.inventory-item-description {
+    color: #3498db; /* bleu pour la description */
+    font-style: italic; /* optionnel pour la différencier encore */
+    margin-left: 5px; /* léger décalage si tu veux */
+}
+
+/* MODALE GRIMOIRE */
+
+.grimoire-modal {
+    display: none; /* fermé par défaut */
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(15,23,42,0.5); /* semi-transparent */
+    justify-content: flex-end; /* aligné à droite */
+    align-items: flex-start;     /* en haut */
+    z-index: 9999;
+    padding-top: 60px;   /* espace depuis le haut */
+    padding-right: 20px; /* espace depuis la droite */
+    font-family: var(--font-secondary);
+}
+
+.grimoire-modal .inventory-content {
+    max-width: 400px;      /* un peu plus petit que l'inventaire */
+    width: 100%;
+    max-height: 80%;
+    overflow-y: auto;
+    background: linear-gradient(145deg, #f8f0d8, #e6d5a8);
+    border-radius: 12px;
+    box-shadow: 0 0 25px rgba(155, 89, 182, 0.6);
+    padding: 25px 20px;
+    border: 4px solid #8b5e3c;
+    color: #3a1e0d;
+    text-align: left;
+    position: relative;
+}
+
+/* Bouton fermer grimoire */
+#closeGrimoire {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    background-color: #8b5e3c;
+    color: #fff8e7;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+#closeGrimoire:hover {
+    background-color: #a0522d;
+    transform: scale(1.05);
+}
+
+/* Titre grimoire */
+.grimoire-title {
+    text-align: center;
+    font-size: 1.6rem;
+    color: #603813;
+    text-shadow: 2px 2px #8b5e3c;
+    margin-bottom: 15px;
+}
+
+/* Contenu des sorts/items */
+.grimoire-item {
+    background-color: rgba(255, 238, 205, 0.8);
+    padding: 10px 15px;
+    margin-bottom: 12px;
+    border-left: 4px solid var(--magic);
+    border-radius: 6px;
+    font-family: var(--font-secondary);
+    color: #2b1d0e;
+}
+
+.grimoire-item-description {
+    color: var(--magic);
+    margin-left: 5px;
+}
+
+/* BANNER IMAGE */
+
+.banner-content {
+    text-align: center;
+    font-size: x-large;
+}
+
+.banner img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* BUTTON GOLD */
+
+.btn-gold {
+    display: inline-block; /* important pour le <a> */
+    background-color: var(--secondary);
+    color: var(--text-dark);
+    padding: 12px 24px;  /* augmente un peu pour la lisibilité */
+    border: none;
+    border-radius: 6px;  /* petit arrondi */
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    font-weight: bold;
+    text-decoration: none; /* supprime le soulignement si c'est un <a> */
+    transition: 0.3s ease;
+    margin-top: 10px;
+}
+
+.btn-gold.large {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+}
+
+.btn-gold:hover {
+    filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.8)) brightness(1.5);
+    transform: scale(1.1); /* Un léger zoom aide à la visibilité */
+}
+
+/* FORMULAIRES CONNEXION / INSCRIPTION */
+
+.form-wrapper {
+    background-color: #ffffff;
+    color: var(--text-dark);
+    width: 400px;
+    margin: 60px auto;
+    padding: 40px;
+    text-align: center;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.form-wrapper h1 {
+    margin-bottom: 30px;
+    font-size: 1.5rem;
+}
+
+.form-wrapper label {
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    margin-top: 15px;
+}
+
+.form-wrapper .formInput {
+    width: 100%;
+    padding: 8px;
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+    background-color: var(--input-bg);
+    border: none;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.form-wrapper button#btn {
+    background-color: var(--primary);
+    color: var(--text-light);
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    margin-top: 15px;
+    transition: 0.3s ease;
+}
+
+.form-wrapper button#btn:hover {
+    filter: brightness(1.2);
+}
+
+.form-wrapper p a {
+    color: var(--primary);
+    text-decoration: underline;
+    font-size: 0.9rem;
+}
+
+.error {
+    background: #ffe0e0;
+    color: #900;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 20px auto;
+    width: fit-content;
+}
+
+.success {
+    background: #e0ffe0;
+    color: #090;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 20px auto;
+    width: fit-content;
+}
+
+/* STORY */
+
+#story {
+    background-color: #c5e1e0;
+    color: var(--text-dark);
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-height: 90vh;
+}
+
+.story-img-wrapper {
+    width: 100%;
+    max-height: 60vh; 
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: center;
+    border-radius: 6px;
+}
+
+.story-img-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain; 
+    border-radius: 6px;
+    display: block;
+}
+
+#story p {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin: 10px 0;
+    overflow-y: auto; 
+    padding: 0 10px;
+}
+
+/* CONTENT SECTION */
+
+.content {
+    background-color: #ffffff;
+    color: var(--text-dark);
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.content p {
+    max-width: 700px;
+    margin: 20px auto 0;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+/* CHOICES FORM */
+
+#choices {
+    text-align: center;
+    margin: 30px auto 50px;
+}
+
+#choices form button,
+#choices form button.btn-fight {
+    background-color: var(--secondary);
+    color: var(--text-dark);
+    padding: 12px 24px;
+    margin: 10px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 1rem;
+    transition: 0.3s ease;
+}
+
+#choices form button:hover {
+    filter: brightness(1.8);
+}
+
+#choices form button.choice.mage { background-color: var(--magic); color: white; }
+
+/* FOOTER */
+
+.footer {
+    background-color: black;
+    color: var(--text-light);
+    font-size: 0.75rem;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    margin-top: auto;
+    gap: 15px;
+}
+
+.footer a:visited {
+        color:#3498db
+    }
+
+/* DIALOGUES */
+
+.npc-friendly { font-family: 'Helvetica', serif; color: green; }
+.npc-enemy { font-family: 'Comic Sans Ms', serif; color: red; }
+
+/* HUD */
+
+#hud {
+    position: fixed;
+    top: 50px;
+    right: 20px;
+    width: 220px;
+    padding: 12px;
+    background: rgba(20, 20, 20, 0.9);
+    border-radius: 12px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.5);
+    color: white;
+    font-size: 14px;
+    z-index: 1000;
+}
+
+.bar {
+    position: relative;
+    width: 100%;
+    height: 18px;
+    background: #333;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.bar .fill {
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+.health .fill {
+    background: linear-gradient(to right, #7a0000, #ff2a2a);
+}
+
+.mana .fill {
+    background: linear-gradient(to right, #001f7a, #3aa0ff);
+}
+
+.bar span {
+    position: absolute;
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+    top: 1px;
+    pointer-events: none;
+}
+
+.gold {
+    text-align: center;
+    margin-top: 6px;
+}
+
+.rgpd {
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 30px 25px;
+    text-align: center;
+    font-family: var(--font-main);
+    color: var(--text-dark);  
+    background-color: var(--text-light);
+    border-radius: 12px;      
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    line-height: 1.6;
+    
+}
+
+.rgpd ul {
+    list-style: none;
+}
+
+/* Container global de l'arène de combat */
+.battle-arena {
+    position: fixed;
+    top: 80px; /* Juste en dessous du HUD joueur */
+    left: 20px;
+    width: 300px;
+    z-index: 900;
+}
+
+/* La boîte de stats du monstre */
+.stat-box.monster {
+    background: rgba(0, 0, 0, 0.85);
+    border: 2px solid #e74c3c;
+    border-radius: 8px;
+    padding: 15px;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    text-align: center;
+}
+
+.stat-box.monster h3 {
+    margin: 0 0 10px 0;
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #ff4d4d;
+}
+
+/* La barre de vie */
+.hp-bar {
+    position: relative;
+    width: 100%;
+    height: 25px;
+    background: #333;
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid #555;
+    margin-bottom: 10px;
+}
+
+/* Le remplissage de la barre */
+.hp-fill {
+    transition: width 0.4s ease-out; /* Animation quand la vie baisse */
+    height: 100%;
+    /* On enlève le background: red du HTML pour mettre un dégradé plus sympa ici */
+    background: linear-gradient(90deg, #c0392b, #e74c3c) !important; 
+}
+
+/* Le texte DES PV à l'intérieur de la barre */
+.stat-box.monster span {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px black;
+    pointer-events: none; /* Pour ne pas gêner le clic */
+}
+
+/* Container global (Le parent) */
+.fight-actions {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column; /* On empile les blocs (boutons du haut VS liste des sorts) */
+    gap: 10px;
+}
+
+/* Container des deux boutons principaux (Attaque et Magie) */
+.main-buttons {
+    display: flex;
+    gap: 10px; /* Espace entre les deux boutons */
+}
+
+.main-buttons form, 
+.main-buttons .btn-spell {
+    flex: 1; /* Force les deux boutons à faire exactement la même largeur */
+}
+
+/* Style commun aux boutons principaux */
+.btn-attack, .btn-spell {
+    width: 100%; /* Important pour remplir le flex: 1 */
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: transform 0.1s, filter 0.2s;
+}
+
+.btn-attack { background: #e67e22; color: white; }
+.btn-spell { background: #3498db; color: white; }
+
+.btn-attack:hover, .btn-spell:hover {
+    filter: brightness(1.2);
+    transform: scale(1.02);
+}
+
+/* --- LE SOUS-MENU DES SORTS --- */
+.spell-submenu {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #3498db;
+    border-radius: 5px;
+    padding: 10px;
+    animation: fadeIn 0.3s forwards;
+}
+
+.btn-spell-choice {
+    width: 100%;
+    background: transparent;
+    color: #3498db;
+    border: 1px solid #3498db;
+    padding: 8px;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.btn-spell-choice:hover {
+    background: #3498db;
+    color: white;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- PAGE GAME OVER --- */
+.body-game-over {
+    background-color: #000;
+    color: #ff0000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.death-container {
+    text-align: center;
+    border: 2px solid #500;
+    padding: 50px;
+    background: radial-gradient(circle, rgba(40,0,0,1) 0%, rgba(0,0,0,1) 100%);
+    box-shadow: 0 0 60px rgba(255, 0, 0, 0.15);
+    border-radius: 5px;
+}
+
+.death-title {
+    font-family: var(--font-secondary);
+    font-size: 5rem;
+    letter-spacing: 15px;
+    margin: 0;
+    text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+    animation: bloodDrip 3s ease-in-out;
+}
+
+.death-log {
+    color: #bbbbbb;
+    font-style: italic;
+    font-size: 1.2rem;
+    margin: 20px 0 40px 0;
+    max-width: 500px;
+}
+
+.btn-retry {
+    display: inline-block;
+    padding: 15px 40px;
+    background: transparent;
+    color: #ff0000;
+    text-decoration: none;
+    border: 1px solid #500;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 2px;
+    transition: all 0.4s ease;
+}
+
+.btn-retry:hover {
+    background: #ff0000;
+    color: #000;
+    box-shadow: 0 0 20px #ff0000;
+}
+
+@keyframes bloodDrip {
+    0% { opacity: 0; transform: translateY(-20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+.combat-log {
+    background: rgba(0,0,0,0.8);
+    color: white;
+    padding: 15px;
+    text-align: center;
+    border: 2px solid #e74c3c;
+    margin: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.burger-menu { display: none; }
+
+.nav-left .close-menu {
+    display: none;
+}
+
+@media (max-width: 600px) {
+    #hud {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 25%;
+    }
+
+    .banner-content p {
+        display: none;
+    }
+
+    .footer {
+        text-align: center;
+    }
+
+    .burger-menu {
+        display: block;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+    }
+
+    .nav-left {
+        position: fixed;
+        left: -100%; /* Totalement hors écran à gauche */
+        top: 0;
+        flex-direction: column;
+        background-color: #1a1a1a;
+        width: 260px !important;
+        height: 100vh;
+        transition: 0.3s; /* Pour l'effet de glisse */
+        z-index: 2000;
+        padding-top: 60px;
+    }
+
+    .nav-left.active {
+        left: 0;
+    }
+
+    .close-menu {
+        list-style: none;
+        text-align: right;
+        padding: 10px 20px;
+        font-size: 2rem;
+        color: white;
+        cursor: pointer;
+    }
+    
+    .nav-left li:not(.close-menu) {
+        border-top: 1px solid #333;
+    }
+    
+    .nav-right {
+        display: flex;
+        gap: 10px;
+    }
+}
