@@ -1,7 +1,7 @@
 # Le-donjon-du-magicien-fou
 Projet d'examen au titre de Developpeur Web et Web mobile
 
-Ce projet est un moteur de jeu web permettant l'exploration d'un univers fictif et interactif crée par mes soins.
+Ce projet est un moteur de jeu web permettant l'exploration d'un univers fictif et interactif créé par mes soins.
 
 La source d'inspiration principale pour la création de ce site à été les "livres dont vous êtes le héros"
 
